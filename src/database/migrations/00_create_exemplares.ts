@@ -1,6 +1,6 @@
 exports.up = function (knex) {
 	return knex.schema.createTable('exemplares', table => {
-		table.increments('id').primary();
+		table.increments('id').unsigned().primary();
 		table.string('titulo').notNullable();
 		table.string('autor').notNullable();
 		table.string('edicao').notNullable();
