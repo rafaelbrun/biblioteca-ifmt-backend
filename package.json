@@ -2,11 +2,11 @@
   "name": "biblioteca-ifmt-backend",
   "version": "1.0.0",
   "description": "Backend do aplicativo biblioteca ifmt",
-  "main": "server.js",
+  "main": "server.ts",
   "scripts": {
     "knex:migrate": "knex --knexfile knexfile.ts migrate:latest",
-    "dev": "nodemon src/server.js",
-    "start": "node src/server.js"
+    "dev": "nodemon src/server.ts",
+    "start": "nodemon src/server.ts"
   },
   "repository": {
     "type": "git",
@@ -25,12 +25,12 @@
     "knex": "^0.95.10",
     "nodemon": "^2.0.12",
     "path": "^0.12.7",
-    "sqlite3": "^5.0.2"
+    "sqlite3": "^5.0.2",
+    "ts-node": "^9.0.0",
+    "ts-node-dev": "^1.0.0"
   },
   "devDependencies": {
     "@types/express": "^4.17.9",
-    "ts-node": "^9.0.0",
-    "ts-node-dev": "^1.0.0",
     "typescript": "^4.0.5"
   }
 }
