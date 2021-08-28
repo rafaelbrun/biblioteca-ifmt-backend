@@ -1,5 +1,5 @@
 export interface ExemplarDto {
-    id: number;
+    id?: number;
     titulo: string;
     autor: string;
     edicao: string;

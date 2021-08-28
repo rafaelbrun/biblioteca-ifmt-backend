@@ -21,9 +21,8 @@ module.exports = {
 
         const exemplar = await knex(tableName).where({ id }).select('*').first();
 
-        var { estoque, ...exemplarDto } = exemplar;
-        exemplarDto = {
-            ...exemplarDto,
+        const exemplarDto = {
+            ...exemplar,
             disponivel: exemplar.estoque > 0 ? true : false
         }
 
@@ -50,5 +49,20 @@ module.exports = {
         }
 
         return response.json(responseBase);
+    },
+
+    async repor(request, response): Promise<ResponseBase<number>> {
+        const id = request.params.id;
+
+        const exemplar = await knex(tableName).where({ id }).select('*').first();
+
+        const quantidade = request.body.quantidade + exemplar.estoque;
+
+        const idResp = await knex(tableName).where({ id }).update({ estoque: quantidade });
+
+        return response.json({
+            success: true,
+            data: idResp
+        });
     }
 }
