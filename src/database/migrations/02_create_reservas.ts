@@ -5,7 +5,7 @@ exports.up = function (knex) {
         table.foreign('id_exemplar').references('id').inTable('exemplares');
 		table.integer('id_discente').unsigned();
 		table.foreign('id_discente').references('id').inTable('discentes');
-        table.datetime('validade', { precision: 6 }).defaultTo(knex.fn.now(6));
+        table.datetime('validade');
     });
 }
 
