@@ -1,0 +1,36 @@
+{
+  "name": "biblioteca-ifmt-backend",
+  "version": "1.0.0",
+  "description": "Backend do aplicativo biblioteca ifmt",
+  "main": "server.js",
+  "scripts": {
+    "knex:migrate": "knex --knexfile knexfile.ts migrate:latest",
+    "dev": "nodemon src/server.js",
+    "start": "node src/server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rafaelbrun/biblioteca-ifmt-backend.git"
+  },
+  "author": "Rafael Brun",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/rafaelbrun/biblioteca-ifmt-backend/issues"
+  },
+  "homepage": "https://github.com/rafaelbrun/biblioteca-ifmt-backend#readme",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "crypto": "^1.0.1",
+    "express": "^4.17.1",
+    "knex": "^0.95.10",
+    "nodemon": "^2.0.12",
+    "path": "^0.12.7",
+    "sqlite3": "^5.0.2"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.9",
+    "ts-node": "^9.0.0",
+    "ts-node-dev": "^1.0.0",
+    "typescript": "^4.0.5"
+  }
+}
