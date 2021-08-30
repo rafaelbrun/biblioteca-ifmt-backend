@@ -4,7 +4,7 @@ exports.up = function (knex) {
 		table.string('nome').notNullable();
 		table.string('matricula').notNullable();
 		table.string('senha').notNullable();
-		table.specificType('alertas', 'INT[]');
+		table.specificType('interesse', 'INT[]');
 	});
 }
 

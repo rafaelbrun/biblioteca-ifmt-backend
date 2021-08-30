@@ -5,7 +5,7 @@ export interface DiscenteDto {
     nome: string;
     matricula: string;
     senha: string;
-    alertas?: number[];
+    interesse?: number[];
     reservas?: ReservaDto[];
 }
 
@@ -19,6 +19,6 @@ export interface DiscenteGetShowDto {
     id?: number;
     nome: string;
     matricula: string;
-    alertas?: number[];
+    interesse?: number[];
     reservas?: ReservaDto[];
 }

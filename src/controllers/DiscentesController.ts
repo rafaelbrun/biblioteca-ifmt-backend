@@ -1,6 +1,6 @@
 import { DiscenteDto, DiscenteGetAllDto, DiscenteGetShowDto } from "../dtos/IDiscente";
 import { ExemplarDto } from "../dtos/IExemplar";
-import { ReservaDto, ReservaGetAllDto } from "../dtos/IReserva";
+import { ReservaGetAllDto } from "../dtos/IReserva";
 import { ResponseBase } from "../dtos/IResponse";
 
 const knex = require('../database/connection.ts');
@@ -107,7 +107,7 @@ async function atualizarEstoque(idExemplar: number) {
     const quantidade = exemplar.estoque - 1;
     await knex('exemplares').where({ id: idExemplar }).update({ estoque: quantidade });
 
-    return '';
+    return null;
 }
 
 export async function getExemplarById(id: number): Promise<ExemplarDto> {
@@ -129,7 +129,7 @@ async function validateReserva(idDiscente: number, idExemplar: number) {
         return errorEstoque
     }
 
-    return null
+    return null;
 }
 
 async function getDiscenteById(id: number): Promise<DiscenteDto> {
@@ -139,9 +139,9 @@ async function getDiscenteById(id: number): Promise<DiscenteDto> {
 async function hasDiscente(id: number) {
     const discente = await getDiscenteById(id);
 
-    if (discente) return '';
+    if (discente) return null;
 
-    return 'Discente não existe'
+    return 'Discente não existe';
 }
 
 async function hasReserva(idDiscente: number, idExemplar: number) {
