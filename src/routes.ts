@@ -11,6 +11,8 @@ router.get('/exemplares', ExemplaresController.index);
 router.get('/exemplares/:id', ExemplaresController.show);
 
 router.post('/discentes/create', DiscentesController.create);
+router.post('/discentes/reservar', DiscentesController.reservarExemplar);
+router.get('/discentes/reservas/:id', DiscentesController.mostrarReservas);
 router.get('/discentes', DiscentesController.index);
 router.get('/discentes/:id', DiscentesController.show);
 

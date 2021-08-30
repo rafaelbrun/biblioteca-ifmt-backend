@@ -19,7 +19,15 @@ module.exports = {
     async show(request, response): Promise<ResponseBase<ExemplarGetShowDto>> {
         const id = request.params.id;
 
-        const exemplar = await knex(tableName).where({ id }).select('*').first();
+        const exemplar = await getExemplarById(id);
+
+        if (!exemplar) {
+            return response.status(400).json({
+                success: false,
+                data: null,
+                error: 'Exemplar não encontrado'
+            })
+        }
 
         const exemplarDto = {
             ...exemplar,
@@ -33,15 +41,7 @@ module.exports = {
     },
 
     async index(request, response): Promise<ResponseBase<ExemplarGetAllDto[]>> {
-        const exemplares: ExemplarDto[] = await knex(tableName).select('*');
-
-        const exemplaresGetAll: ExemplarGetAllDto[] = exemplares.map((exemplar) => {
-            return {
-                id: exemplar.id,
-                autor: exemplar.autor,
-                titulo: exemplar.titulo
-            }
-        })
+        const exemplaresGetAll: ExemplarGetAllDto[] = await knex(tableName).select('id', 'titulo', 'autor');
 
         const responseBase: ResponseBase<ExemplarGetAllDto[]> = {
             success: true,
@@ -54,7 +54,15 @@ module.exports = {
     async repor(request, response): Promise<ResponseBase<number>> {
         const id = request.params.id;
 
-        const exemplar = await knex(tableName).where({ id }).select('*').first();
+        const exemplar = await getExemplarById(id);
+
+        if (!exemplar) {
+            return response.status(400).json({
+                success: false,
+                data: null,
+                error: 'Exemplar não encontrado'
+            })
+        }
 
         const quantidade = request.body.quantidade + exemplar.estoque;
 
@@ -65,4 +73,8 @@ module.exports = {
             data: idResp
         });
     }
+}
+
+export async function getExemplarById(id: number): Promise<ExemplarDto> {
+    return knex(tableName).where({ id }).select('*').first();
 }
