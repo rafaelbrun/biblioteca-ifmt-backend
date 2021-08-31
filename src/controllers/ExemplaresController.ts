@@ -41,11 +41,18 @@ module.exports = {
     },
 
     async index(request, response): Promise<ResponseBase<ExemplarGetAllDto[]>> {
-        const exemplaresGetAll: ExemplarGetAllDto[] = await knex(tableName).select('id', 'titulo', 'autor');
+        const exemplaresGetAll: ExemplarGetAllDto[] = await knex(tableName).select('*').orderBy('titulo');
 
-        const responseBase: ResponseBase<ExemplarGetAllDto[]> = {
+        const exemplaresMappedAll = exemplaresGetAll.map((exemplar) => {
+            return {
+                ...exemplar,
+                disponivel: exemplar.estoque > 0
+            }
+        });
+
+        const responseBase: ResponseBase<any[]> = {
             success: true,
-            data: exemplaresGetAll
+            data: exemplaresMappedAll
         }
 
         return response.json(responseBase);
