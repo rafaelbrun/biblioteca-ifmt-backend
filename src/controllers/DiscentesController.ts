@@ -18,6 +18,31 @@ module.exports = {
         });
     },
 
+    async login(request, response) {
+        var login = false;
+        const {
+            matricula,
+            senha
+        } = request.body
+
+        console.log(matricula);
+        console.log(senha);
+        
+
+        const user = await knex(tableName).where({ matricula, senha }).select('*').first();
+        if (user) {
+            login = true;
+            return response.json({
+                login: login,
+                user: user
+            })
+        }
+        return response.json({
+            login: login,
+            user: user
+        })
+    },
+
     async show(request, response): Promise<ResponseBase<DiscenteGetShowDto>> {
         const id = request.params.id;
 
@@ -57,7 +82,7 @@ module.exports = {
 
         const validReservaError = await validateReserva(idDiscente, idExemplar);
         if (validReservaError) {
-            return response.status(400).json({
+            return response.json({
                 success: false,
                 data: null,
                 error: validReservaError
@@ -115,6 +140,10 @@ export async function getExemplarById(id: number): Promise<ExemplarDto> {
 }
 
 async function validateReserva(idDiscente: number, idExemplar: number) {
+    if (!idDiscente || !idExemplar) {
+        return 'Informações incorretas'
+    }
+
     if (await hasReserva(idDiscente, idExemplar)) {
         return 'Essa reserva já foi realizada';
     }
