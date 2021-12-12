@@ -27,7 +27,7 @@ module.exports = {
 
         console.log(matricula);
         console.log(senha);
-        
+
 
         const user = await knex(tableName).where({ matricula, senha }).select('*').first();
         if (user) {
@@ -116,6 +116,29 @@ module.exports = {
             success: true,
             data: reservasMap
         });
+    },
+
+    async criarInteresse(request, response) {
+        const idDiscente = request.body.idDiscente;
+        const idExemplar = request.body.idExemplar;
+
+        const discente = await getDiscenteById(idDiscente);
+        var newInteresse = [];
+        if (discente.interesse) {
+            newInteresse = discente.interesse;
+            console.log(newInteresse);
+            newInteresse.push(idExemplar);
+        } else {
+            newInteresse.push(idExemplar);
+        }
+
+
+
+        await knex(tableName).where({ id: idDiscente }).update({ interesse: newInteresse });
+
+        return response.json({
+            success: true
+        });
     }
 }
 
@@ -145,7 +168,7 @@ async function validateReserva(idDiscente: number, idExemplar: number) {
     }
 
     if (await hasReserva(idDiscente, idExemplar)) {
-        return 'Essa reserva já foi realizada';
+        return 'Você já realizou essa reserva';
     }
 
     var errorDiscente = await hasDiscente(idDiscente);
