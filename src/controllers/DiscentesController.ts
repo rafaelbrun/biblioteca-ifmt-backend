@@ -1,95 +1,96 @@
-import {
-  DiscenteDto,
-  DiscenteGetAllDto,
-  DiscenteGetShowDto,
-} from '../dtos/Discente';
-import { ExemplarDto } from '../dtos/Exemplar';
-import { ReservaGetAllDto } from '../dtos/Reserva';
-import { ResponseBase } from '../dtos/Response';
+import { Request, Response } from 'express';
+
+import { DiscenteDto, DiscenteGetAllDto } from 'src/dtos/Discente';
+import { ExemplarDto } from 'src/dtos/Exemplar';
+import { ReservaDto } from 'src/dtos/Reserva';
 
 const knex = require('../database/connection.ts');
 
-const tableName = 'discentes';
+const TABLE_NAME = 'discentes';
 
 module.exports = {
-  async create(request, response): Promise<ResponseBase<number>> {
+  async create(request: Request, response: Response): Promise<void> {
     const discente: DiscenteDto = request.body;
 
-    const id: number = await knex(tableName).insert(discente);
-    return response.json({
-      success: true,
+    const id: number = await knex(TABLE_NAME).insert(discente);
+    response.status(200).json({
       data: id,
-    });
-  },
-
-  async login(request, response) {
-    var login = false;
-    const { matricula, senha } = request.body;
-
-    console.log(matricula);
-    console.log(senha);
-
-    const user = await knex(tableName)
-      .where({ matricula, senha })
-      .select('*')
-      .first();
-    if (user) {
-      login = true;
-      return response.json({
-        login: login,
-        user: user,
-      });
-    }
-    return response.json({
-      login: login,
-      user: user,
-    });
-  },
-
-  async show(request, response): Promise<ResponseBase<DiscenteGetShowDto>> {
-    const id = request.params.id;
-
-    const discente: DiscenteDto = await getDiscenteById(id);
-
-    var { senha, ...discenteDto } = discente;
-
-    return response.json({
       success: true,
-      data: discenteDto,
     });
   },
 
-  async index(request, response): Promise<ResponseBase<DiscenteGetAllDto[]>> {
-    const discentes: DiscenteDto[] = await knex(tableName).select('*');
+  async criarInteresse(request: Request, response: Response): Promise<void> {
+    const { idExemplar, idDiscente } = request.body;
+
+    const discente = await getDiscenteById(idDiscente);
+    let newInteresse = [];
+    if (discente.interesse) {
+      newInteresse = discente.interesse;
+      newInteresse.push(idExemplar);
+    } else {
+      newInteresse.push(idExemplar);
+    }
+
+    await knex(TABLE_NAME)
+      .where({ id: idDiscente })
+      .update({ interesse: newInteresse });
+
+    response.status(200).json({
+      success: true,
+    });
+  },
+
+  async index(_: Request, response: Response): Promise<void> {
+    const discentes: DiscenteDto[] = await knex(TABLE_NAME).select('*');
 
     const discentesGetAll: DiscenteGetAllDto[] = discentes.map((discente) => {
       return {
-        id: discente.id,
+        id: discente.id ?? -1,
         matricula: discente.matricula,
         nome: discente.nome,
       };
     });
 
-    const responseBase: ResponseBase<DiscenteGetAllDto[]> = {
-      success: true,
+    response.json({
       data: discentesGetAll,
-    };
-
-    return response.json(responseBase);
+      success: true,
+    });
   },
 
-  async reservarExemplar(request, response): Promise<ResponseBase<number>> {
-    const idDiscente = request.body.idDiscente;
-    const idExemplar = request.body.idExemplar;
+  async mostrarReservas(request: Request, response: Response): Promise<void> {
+    const reservas = await knex('reservas')
+      .where({ id_discente: request.params.id })
+      .select('id', 'id_exemplar', 'validade');
+
+    const reservasMap = await Promise.all(
+      reservas.map(async (reserva: ReservaDto) => {
+        return {
+          exemplar: await getExemplarById(reserva.id_exemplar),
+          id: reserva.id,
+          validade: reserva.validade,
+        };
+      }),
+    );
+
+    response.status(200).json({
+      data: reservasMap,
+      success: true,
+    });
+  },
+
+  async reservarExemplar(request: Request, response: Response): Promise<void> {
+    const { idExemplar, idDiscente } = request.body;
     const nextWeekConst = nextWeek();
 
     const validReservaError = await validateReserva(idDiscente, idExemplar);
+
     if (validReservaError) {
-      return response.json({
-        success: false,
+      response.status(400).json({
         data: null,
         error: validReservaError,
+        success: false,
       });
+      return;
     }
 
     const reserva = {
@@ -98,67 +99,37 @@ module.exports = {
       validade: nextWeekConst,
     };
     const id: number = await knex('reservas').insert(reserva);
-    return response.json({
-      success: true,
+    response.status(200).json({
       data: id,
-    });
-  },
-
-  async mostrarReservas(
-    request,
-    response,
-  ): Promise<ResponseBase<ReservaGetAllDto[]>> {
-    const reservas = await knex('reservas')
-      .where({ id_discente: request.params.id })
-      .select('id', 'id_exemplar', 'validade');
-
-    const reservasMap = await Promise.all(
-      reservas.map(async (reserva) => {
-        return {
-          id: reserva.id,
-          validade: reserva.validade,
-          exemplar: await getExemplarById(reserva.id_exemplar),
-        };
-      }),
-    );
-
-    return response.json({
       success: true,
-      data: reservasMap,
     });
   },
 
-  async criarInteresse(request, response) {
-    const idDiscente = request.body.idDiscente;
-    const idExemplar = request.body.idExemplar;
+  async show(request: Request, response: Response): Promise<void> {
+    const id = request.params.id;
 
-    const discente = await getDiscenteById(idDiscente);
-    var newInteresse = [];
-    if (discente.interesse) {
-      newInteresse = discente.interesse;
-      console.log(newInteresse);
-      newInteresse.push(idExemplar);
-    } else {
-      newInteresse.push(idExemplar);
-    }
+    const discente: DiscenteDto = await getDiscenteById(Number(id));
 
-    await knex(tableName)
-      .where({ id: idDiscente })
-      .update({ interesse: newInteresse });
+    const { ...discenteDto } = discente;
 
-    return response.json({
+    response.status(200).json({
+      data: discenteDto,
       success: true,
     });
   },
 };
 
-async function atualizarEstoque(idExemplar: number) {
+const getExemplarById = (id: number): Promise<ExemplarDto> => {
+  return knex('exemplares').where({ id }).select('*').first();
+};
+
+const atualizarEstoque = async (idExemplar: number): Promise<string | null> => {
   const exemplar = await getExemplarById(idExemplar);
 
   if (!exemplar) {
     return 'Exemplar não encontrado';
   }
-  if (exemplar?.estoque == 0) {
+  if (exemplar?.estoque === 0) {
     return 'Não tem exemplar em estoque';
   }
 
@@ -168,13 +139,12 @@ async function atualizarEstoque(idExemplar: number) {
     .update({ estoque: quantidade });
 
   return null;
-}
+};
 
-export async function getExemplarById(id: number): Promise<ExemplarDto> {
-  return knex('exemplares').where({ id }).select('*').first();
-}
-
-async function validateReserva(idDiscente: number, idExemplar: number) {
+const validateReserva = async (
+  idDiscente: number,
+  idExemplar: number,
+): Promise<string | null> => {
   if (!idDiscente || !idExemplar) {
     return 'Informações incorretas';
   }
@@ -183,52 +153,55 @@ async function validateReserva(idDiscente: number, idExemplar: number) {
     return 'Você já realizou essa reserva';
   }
 
-  var errorDiscente = await hasDiscente(idDiscente);
-  if (errorDiscente) {
-    return errorDiscente;
+  const isDiscenteValid = await hasDiscente(idDiscente);
+  if (!isDiscenteValid) {
+    return 'Discente não existe';
   }
 
-  var errorEstoque = await atualizarEstoque(idExemplar);
+  const errorEstoque = await atualizarEstoque(idExemplar);
   if (errorEstoque) {
     return errorEstoque;
   }
 
   return null;
-}
+};
 
-async function getDiscenteById(id: number): Promise<DiscenteDto> {
-  return knex(tableName).where({ id }).select('*').first();
-}
+const getDiscenteById = (id: number): Promise<DiscenteDto> => {
+  return knex(TABLE_NAME).where({ id }).select('*').first();
+};
 
-async function hasDiscente(id: number) {
+const hasDiscente = async (id: number): Promise<boolean> => {
   const discente = await getDiscenteById(id);
 
-  if (discente) return null;
+  return discente != null;
+};
 
-  return 'Discente não existe';
-}
-
-async function hasReserva(idDiscente: number, idExemplar: number) {
+const hasReserva = async (
+  idDiscente: number,
+  idExemplar: number,
+): Promise<boolean> => {
   const reserva = await knex('reservas')
     .where({ id_discente: idDiscente, id_exemplar: idExemplar })
     .select('*');
 
   return reserva.length > 0;
-}
+};
 
-function nextWeek() {
-  var today = new Date();
+const nextWeek = (): string => {
+  const today = new Date();
   today.setTime(today.getTime() + 7 * 86400000);
   return (
-    adicionaZero(today.getDate().toString()) +
+    adicionaZero(today.getDate()) +
     '/' +
-    adicionaZero(today.getMonth() + 1).toString() +
+    adicionaZero(today.getMonth() + 1) +
     '/' +
     today.getFullYear()
   );
-}
+};
 
-function adicionaZero(numero) {
-  if (numero <= 9) return '0' + numero;
-  else return numero;
-}
+const adicionaZero = (numero: number): string => {
+  if (numero <= 9) {
+    return '0' + numero;
+  }
+  return numero.toString();
+};

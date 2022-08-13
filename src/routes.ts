@@ -1,22 +1,23 @@
 export {};
+import express from 'express';
 
-const ExemplaresController = require('./controllers/ExemplaresController');
+const AuthController = require('./controllers/AuthController');
 const DiscentesController = require('./controllers/DiscentesController');
-const express = require('express');
+const ExemplaresController = require('./controllers/ExemplaresController');
+
 const router = express.Router();
+
+router.post('/auth/login', AuthController.login);
 
 router.post('/exemplares/create', ExemplaresController.create);
 router.put('/exemplares/repor/:id', ExemplaresController.repor);
 router.get('/exemplares/:id', ExemplaresController.show);
-
-router.post('/discentes/create', DiscentesController.create);
-router.get('/discentes', DiscentesController.index);
-
 router.get('/exemplares', ExemplaresController.index);
 
-router.post('/discentes/auth', DiscentesController.login);
+router.post('/discentes/create', DiscentesController.create);
 router.post('/discentes/reservar', DiscentesController.reservarExemplar);
 router.post('/discentes/interesse', DiscentesController.criarInteresse);
+router.get('/discentes', DiscentesController.index);
 router.get('/discentes/reservas/:id', DiscentesController.mostrarReservas);
 router.get('/discentes/:id', DiscentesController.show);
 

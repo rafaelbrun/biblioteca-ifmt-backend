@@ -1,50 +1,27 @@
+import { Request, Response } from 'express';
+
 import {
   ExemplarDto,
   ExemplarGetAllDto,
   ExemplarGetShowDto,
-} from '../dtos/Exemplar';
-import { ResponseBase } from '../dtos/Response';
+} from 'src/dtos/Exemplar';
 
-const knex = require('../database/connection.ts');
+const knex = require('../database/connection');
 
 const tableName = 'exemplares';
 
 module.exports = {
-  async create(request, response): Promise<ResponseBase<number>> {
+  async create(request: Request, response: Response): Promise<void> {
     const exemplares: ExemplarDto[] = request.body;
 
     const count: number = await knex(tableName).insert(exemplares);
-    return response.json({
-      success: true,
+    response.status(200).json({
       data: count,
-    });
-  },
-
-  async show(request, response): Promise<ResponseBase<ExemplarGetShowDto>> {
-    const id = request.params.id;
-
-    const exemplar = await getExemplarById(id);
-
-    if (!exemplar) {
-      return response.json({
-        success: false,
-        data: null,
-        error: 'Exemplar não encontrado',
-      });
-    }
-
-    const exemplarDto = {
-      ...exemplar,
-      disponivel: exemplar.estoque > 0 ? true : false,
-    };
-
-    return response.json({
       success: true,
-      data: exemplarDto,
     });
   },
 
-  async index(request, response): Promise<ResponseBase<ExemplarGetAllDto[]>> {
+  async index(_: Request, response: Response): Promise<void> {
     const exemplaresGetAll: ExemplarGetAllDto[] = await knex(tableName)
       .select('*')
       .orderBy('titulo');
@@ -56,40 +33,63 @@ module.exports = {
       };
     });
 
-    const responseBase: ResponseBase<any[]> = {
-      success: true,
+    response.json({
       data: exemplaresMappedAll,
-    };
-
-    return response.json(responseBase);
+      success: true,
+    });
   },
 
-  async repor(request, response): Promise<ResponseBase<number>> {
+  async repor(request: Request, response: Response): Promise<void> {
     const id = request.params.id;
 
-    const exemplar = await getExemplarById(id);
+    const exemplar = await getExemplarById(Number(id));
 
     if (!exemplar) {
-      return response.json({
-        success: false,
+      response.status(400).json({
         data: null,
         error: 'Exemplar não encontrado',
+        success: false,
       });
     }
 
-    const quantidade = request.body.quantidade + exemplar.estoque;
+    const quantidade: number = request.body.quantidade + exemplar.estoque;
 
     const idResp = await knex(tableName)
       .where({ id })
       .update({ estoque: quantidade });
 
-    return response.json({
-      success: true,
+    response.status(200).json({
       data: idResp,
+      success: true,
+    });
+  },
+
+  async show(request: Request, response: Response): Promise<void> {
+    const id = request.params.id;
+
+    const exemplar = await getExemplarById(Number(id));
+
+    if (!exemplar) {
+      response.status(400).json({
+        data: null,
+        error: 'Exemplar não encontrado',
+        success: false,
+      });
+    }
+
+    const exemplarDto: ExemplarGetShowDto = {
+      ...exemplar,
+      disponivel: exemplar.estoque > 0 ? true : false,
+      id: exemplar.id ?? -1,
+    };
+
+    response.status(200).json({
+      data: exemplarDto,
+      success: true,
     });
   },
 };
 
-export async function getExemplarById(id: number): Promise<ExemplarDto> {
+const getExemplarById = async (id: number): Promise<ExemplarDto> => {
   return knex(tableName).where({ id }).select('*').first();
-}
+};

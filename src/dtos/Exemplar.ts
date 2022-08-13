@@ -1,27 +1,27 @@
 export interface ExemplarDto {
-  id?: number;
-  titulo: string;
   autor: string;
   edicao: string;
   editora: string;
   estoque: number;
+  id?: number;
+  titulo: string;
 }
 
 export interface ExemplarGetAllDto {
-  id: number;
-  titulo: string;
   autor: string;
+  disponivel?: boolean;
   edicao: string;
   editora: string;
   estoque: number;
-  disponivel?: boolean;
+  id: number;
+  titulo: string;
 }
 
 export interface ExemplarGetShowDto {
-  id: number;
-  titulo: string;
   autor: string;
+  disponivel: boolean;
   edicao: string;
   editora: string;
-  disponivel: boolean;
+  id: number;
+  titulo: string;
 }

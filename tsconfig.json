@@ -1,9 +1,22 @@
 {
   "compilerOptions": {
-    "module": "commonjs",
+    "allowJs": true,
+    "allowSyntheticDefaultImports": true,
+    "baseUrl": "./",
     "esModuleInterop": true,
-    "target": "es6",
+    "isolatedModules": false,
+    "jsx": "react-native",
+    "lib": ["es2019"],
+    "module": "commonjs",
     "moduleResolution": "node",
+    "noEmit": true,
+    "paths": {
+      "src/*": ["src/*"]
+    },
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "target": "es6",
     "sourceMap": true,
     "outDir": "dist",
   },
