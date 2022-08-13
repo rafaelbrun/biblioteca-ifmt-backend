@@ -11,6 +11,6 @@ app.use(express.urlencoded({ extended: true }));
 app.use(routes);
 
 app.listen(process.env.PORT || 3333, function (err: any) {
-	if (err) console.error(err);
-	console.log(`API INICIADA NA PORTA ${3333}`)
+  if (err) console.error(err);
+  console.log(`API INICIADA NA PORTA ${3333}`);
 });

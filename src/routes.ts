@@ -1,4 +1,4 @@
-export { };
+export {};
 
 const ExemplaresController = require('./controllers/ExemplaresController');
 const DiscentesController = require('./controllers/DiscentesController');
@@ -11,7 +11,6 @@ router.get('/exemplares/:id', ExemplaresController.show);
 
 router.post('/discentes/create', DiscentesController.create);
 router.get('/discentes', DiscentesController.index);
-
 
 router.get('/exemplares', ExemplaresController.index);
 
