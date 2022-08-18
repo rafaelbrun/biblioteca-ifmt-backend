@@ -22,13 +22,20 @@ module.exports = {
   async criarInteresse(request: Request, response: Response): Promise<void> {
     const { idExemplar, idDiscente } = request.body;
 
+    if (!(await getExemplarById(idExemplar))) {
+      response.status(400).json({
+        error: 'Exemplar não encontrado',
+        success: false,
+      });
+      return;
+    }
     const discente = await getDiscenteById(idDiscente);
-    let newInteresse = [];
-    if (discente.interesse) {
-      newInteresse = discente.interesse;
-      newInteresse.push(idExemplar);
+
+    let newInteresse = '';
+    if (discente.interesse == null) {
+      newInteresse = `${idExemplar}`;
     } else {
-      newInteresse.push(idExemplar);
+      newInteresse = `${discente.interesse},${idExemplar}`;
     }
 
     await knex(TABLE_NAME)
@@ -46,6 +53,7 @@ module.exports = {
     const discentesGetAll: DiscenteGetAllDto[] = discentes.map((discente) => {
       return {
         id: discente.id ?? -1,
+        interesse: discente.interesse,
         matricula: discente.matricula,
         nome: discente.nome,
       };

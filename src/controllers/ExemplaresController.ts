@@ -8,21 +8,43 @@ import {
 
 const knex = require('../database/connection');
 
-const tableName = 'exemplares';
+const TABLE_NAME = 'exemplares';
 
 module.exports = {
   async create(request: Request, response: Response): Promise<void> {
     const exemplares: ExemplarDto[] = request.body;
 
-    const count: number = await knex(tableName).insert(exemplares);
+    const count: number = await knex(TABLE_NAME).insert(exemplares);
     response.status(200).json({
       data: count,
       success: true,
     });
   },
 
+  async getMultipleIds(request: Request, response: Response): Promise<void> {
+    const ids: number[] = request.body.ids;
+
+    const exemplares = await getMultiExemplares(ids);
+
+    const exemplaresDto: ExemplarGetAllDto[] = [];
+
+    exemplares.forEach((exemplar) => {
+      const exemplarDto: ExemplarGetAllDto = {
+        ...exemplar,
+        disponivel: exemplar.estoque > 0 ? true : false,
+        id: exemplar.id ?? -1,
+      };
+      exemplaresDto.push(exemplarDto);
+    });
+
+    response.status(200).json({
+      data: exemplaresDto,
+      success: true,
+    });
+  },
+
   async index(_: Request, response: Response): Promise<void> {
-    const exemplaresGetAll: ExemplarGetAllDto[] = await knex(tableName)
+    const exemplaresGetAll: ExemplarGetAllDto[] = await knex(TABLE_NAME)
       .select('*')
       .orderBy('titulo');
 
@@ -54,7 +76,7 @@ module.exports = {
 
     const quantidade: number = request.body.quantidade + exemplar.estoque;
 
-    const idResp = await knex(tableName)
+    const idResp = await knex(TABLE_NAME)
       .where({ id })
       .update({ estoque: quantidade });
 
@@ -75,6 +97,7 @@ module.exports = {
         error: 'Exemplar não encontrado',
         success: false,
       });
+      return;
     }
 
     const exemplarDto: ExemplarGetShowDto = {
@@ -90,6 +113,10 @@ module.exports = {
   },
 };
 
+const getMultiExemplares = async (ids: number[]): Promise<ExemplarDto[]> => {
+  return knex(TABLE_NAME).whereIn('id', ids).select('*');
+};
+
 const getExemplarById = async (id: number): Promise<ExemplarDto> => {
-  return knex(tableName).where({ id }).select('*').first();
+  return knex(TABLE_NAME).where({ id }).select('*').first();
 };

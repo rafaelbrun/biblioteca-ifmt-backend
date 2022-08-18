@@ -12,6 +12,7 @@ router.post('/auth/login', AuthController.login);
 router.post('/exemplares/create', ExemplaresController.create);
 router.put('/exemplares/repor/:id', ExemplaresController.repor);
 router.get('/exemplares/:id', ExemplaresController.show);
+router.post('/exemplares/multi', ExemplaresController.getMultipleIds);
 router.get('/exemplares', ExemplaresController.index);
 
 router.post('/discentes/create', DiscentesController.create);

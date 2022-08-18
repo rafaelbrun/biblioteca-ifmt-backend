@@ -1,5 +1,5 @@
-exports.up = function (knex) {
-  return knex.schema.createTable('reservas', (table) => {
+exports.up = function (knex: any) {
+  return knex.schema.createTable('reservas', (table: any) => {
     table.increments('id').unsigned().primary();
     table.integer('id_exemplar').unsigned();
     table.foreign('id_exemplar').references('id').inTable('exemplares');
@@ -9,6 +9,6 @@ exports.up = function (knex) {
   });
 };
 
-exports.down = function (knex) {
+exports.down = function (knex: any) {
   return knex.schema.dropTable('reservas');
 };

@@ -2,7 +2,7 @@ import { ReservaDto } from './Reserva';
 
 export interface DiscenteDto {
   id?: number;
-  interesse?: number[];
+  interesse?: string;
   matricula: string;
   nome: string;
   reservas?: ReservaDto[];
