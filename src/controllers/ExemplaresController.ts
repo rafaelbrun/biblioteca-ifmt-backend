@@ -67,7 +67,7 @@ module.exports = {
     const exemplar = await getExemplarById(Number(id));
 
     if (!exemplar) {
-      response.status(400).json({
+      response.status(200).json({
         data: null,
         error: 'Exemplar não encontrado',
         success: false,
@@ -92,7 +92,7 @@ module.exports = {
     const exemplar = await getExemplarById(Number(id));
 
     if (!exemplar) {
-      response.status(400).json({
+      response.status(200).json({
         data: null,
         error: 'Exemplar não encontrado',
         success: false,

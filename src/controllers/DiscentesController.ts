@@ -22,20 +22,27 @@ module.exports = {
   async criarInteresse(request: Request, response: Response): Promise<void> {
     const { idExemplar, idDiscente } = request.body;
 
-    if (!(await getExemplarById(idExemplar))) {
-      response.status(400).json({
-        error: 'Exemplar não encontrado',
+    const validateInteresseError = await validateCriarInteress(
+      idDiscente,
+      idExemplar,
+    );
+
+    if (validateInteresseError) {
+      response.status(200).json({
+        error: validateInteresseError,
         success: false,
       });
       return;
     }
+
     const discente = await getDiscenteById(idDiscente);
+    const interesse = discente.interesse;
 
     let newInteresse = '';
-    if (discente.interesse == null) {
+    if (interesse === null || interesse === '') {
       newInteresse = `${idExemplar}`;
     } else {
-      newInteresse = `${discente.interesse},${idExemplar}`;
+      newInteresse = `${interesse},${idExemplar}`;
     }
 
     await knex(TABLE_NAME)
@@ -86,6 +93,31 @@ module.exports = {
     });
   },
 
+  async removerInteresse(request: Request, response: Response): Promise<void> {
+    const { idExemplar, idDiscente } = request.body;
+
+    const discente = await getDiscenteById(idDiscente);
+    const interesse = discente.interesse;
+
+    const removedInteresseCommaLast = interesse?.replace(`${idExemplar},`, '');
+    const removedInteresseCommaFirst = removedInteresseCommaLast?.replace(
+      `,${idExemplar}`,
+      '',
+    );
+    const removedInteresse = removedInteresseCommaFirst?.replace(
+      `${idExemplar}`,
+      '',
+    );
+
+    await knex(TABLE_NAME)
+      .where({ id: idDiscente })
+      .update({ interesse: removedInteresse });
+
+    response.status(200).json({
+      success: true,
+    });
+  },
+
   async reservarExemplar(request: Request, response: Response): Promise<void> {
     const { idExemplar, idDiscente } = request.body;
     const nextWeekConst = nextWeek();
@@ -93,7 +125,7 @@ module.exports = {
     const validReservaError = await validateReserva(idDiscente, idExemplar);
 
     if (validReservaError) {
-      response.status(400).json({
+      response.status(200).json({
         data: null,
         error: validReservaError,
         success: false,
@@ -174,6 +206,25 @@ const validateReserva = async (
   return null;
 };
 
+const validateCriarInteress = async (
+  idDiscente: number,
+  idExemplar: number,
+): Promise<string | null> => {
+  if (!(await hasDiscente(idDiscente))) {
+    return 'Discente não encontrado';
+  }
+
+  if (!(await getExemplarById(idExemplar))) {
+    return 'Exemplar não encontrado';
+  }
+
+  if (await hasInteresse(idDiscente, idExemplar)) {
+    return 'Você já criou esse Interesse';
+  }
+
+  return null;
+};
+
 const getDiscenteById = (id: number): Promise<DiscenteDto> => {
   return knex(TABLE_NAME).where({ id }).select('*').first();
 };
@@ -195,9 +246,24 @@ const hasReserva = async (
   return reserva.length > 0;
 };
 
+const hasInteresse = async (
+  idDiscente: number,
+  idExemplar: number,
+): Promise<boolean> => {
+  const discente: DiscenteDto = await knex(TABLE_NAME)
+    .where({ id: idDiscente })
+    .select('*')
+    .first();
+
+  if (discente.interesse) {
+    return discente.interesse?.includes(idExemplar.toString());
+  }
+  return false;
+};
+
 const nextWeek = (): string => {
   const today = new Date();
-  today.setTime(today.getTime() + 7 * 86400000);
+  today.setTime(today.getTime() + 30 * 86400000);
   return (
     adicionaZero(today.getDate()) +
     '/' +
