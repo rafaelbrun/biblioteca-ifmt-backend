@@ -17,6 +17,7 @@ router.get('/exemplares', ExemplaresController.index);
 
 router.post('/discentes/create', DiscentesController.create);
 router.post('/discentes/reservar', DiscentesController.reservarExemplar);
+router.post('/discentes/reserva/remover', DiscentesController.removerReserva);
 router.post('/discentes/interesse', DiscentesController.criarInteresse);
 router.post(
   '/discentes/interesse/remover',

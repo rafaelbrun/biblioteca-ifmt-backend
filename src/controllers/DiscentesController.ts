@@ -118,6 +118,19 @@ module.exports = {
     });
   },
 
+  async removerReserva(request: Request, response: Response): Promise<void> {
+    const { idExemplar, idDiscente } = request.body;
+
+    const data = await knex('reservas')
+      .where({
+        id_discente: idDiscente,
+        id_exemplar: idExemplar,
+      })
+      .del();
+
+    response.status(200).json({ data, success: true });
+  },
+
   async reservarExemplar(request: Request, response: Response): Promise<void> {
     const { idExemplar, idDiscente } = request.body;
     const nextWeekConst = nextWeek();
