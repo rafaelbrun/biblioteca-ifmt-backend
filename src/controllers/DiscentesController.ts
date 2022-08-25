@@ -22,7 +22,7 @@ module.exports = {
   async criarInteresse(request: Request, response: Response): Promise<void> {
     const { idExemplar, idDiscente } = request.body;
 
-    const validateInteresseError = await validateCriarInteress(
+    const validateInteresseError = await validateCriarInteresse(
       idDiscente,
       idExemplar,
     );
@@ -89,6 +89,16 @@ module.exports = {
 
     response.status(200).json({
       data: reservasMap,
+      success: true,
+    });
+  },
+
+  async removerAlertas(request: Request, response: Response): Promise<void> {
+    const id = request.params.id;
+
+    await knex(TABLE_NAME).where({ id }).update({ alertas: '' });
+
+    response.status(200).json({
       success: true,
     });
   },
@@ -219,7 +229,7 @@ const validateReserva = async (
   return null;
 };
 
-const validateCriarInteress = async (
+const validateCriarInteresse = async (
   idDiscente: number,
   idExemplar: number,
 ): Promise<string | null> => {

@@ -5,6 +5,7 @@ exports.up = function (knex: any) {
     table.string('matricula').notNullable();
     table.string('senha').notNullable();
     table.string('interesse');
+    table.string('alertas');
   });
 };
 

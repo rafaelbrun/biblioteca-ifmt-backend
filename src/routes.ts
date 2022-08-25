@@ -26,5 +26,9 @@ router.post(
 router.get('/discentes', DiscentesController.index);
 router.get('/discentes/reservas/:id', DiscentesController.mostrarReservas);
 router.get('/discentes/:id', DiscentesController.show);
+router.delete(
+  '/discentes/alertas/limpar/:id',
+  DiscentesController.removerAlertas,
+);
 
 module.exports = router;

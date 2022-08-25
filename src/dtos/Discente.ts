@@ -1,6 +1,7 @@
 import { ReservaDto } from './Reserva';
 
 export interface DiscenteDto {
+  alertas?: string;
   id?: number;
   interesse?: string;
   matricula: string;
@@ -16,6 +17,7 @@ export interface DiscenteGetAllDto {
 }
 
 export interface DiscenteGetShowDto {
+  alertas?: number[];
   id?: number;
   interesse?: number[];
   matricula: string;

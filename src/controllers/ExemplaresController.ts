@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 
+import { DiscenteDto } from 'src/dtos/Discente';
 import {
   ExemplarDto,
   ExemplarGetAllDto,
@@ -62,9 +63,9 @@ module.exports = {
   },
 
   async repor(request: Request, response: Response): Promise<void> {
-    const id = request.params.id;
+    const id = Number(request.params.id);
 
-    const exemplar = await getExemplarById(Number(id));
+    const exemplar = await getExemplarById(id);
 
     if (!exemplar) {
       response.status(200).json({
@@ -72,9 +73,13 @@ module.exports = {
         error: 'Exemplar não encontrado',
         success: false,
       });
+      return;
     }
-
     const quantidade: number = request.body.quantidade + exemplar.estoque;
+
+    if (exemplar.estoque <= 0 && quantidade > 0) {
+      await criarAlerta(id);
+    }
 
     const idResp = await knex(TABLE_NAME)
       .where({ id })
@@ -119,4 +124,27 @@ const getMultiExemplares = async (ids: number[]): Promise<ExemplarDto[]> => {
 
 const getExemplarById = async (id: number): Promise<ExemplarDto> => {
   return knex(TABLE_NAME).where({ id }).select('*').first();
+};
+
+const criarAlerta = async (idExemplar: number): Promise<void> => {
+  const discentes = await getDiscenteByExemplar(idExemplar);
+
+  discentes.forEach(async (discente) => {
+    const alerta = discente.alertas;
+
+    let newAlerta = '';
+    if (alerta === null || alerta === '') {
+      newAlerta = `${idExemplar}`;
+    } else {
+      newAlerta = `${alerta},${idExemplar}`;
+    }
+
+    await knex('discentes')
+      .where({ id: discente.id })
+      .update({ alertas: newAlerta });
+  });
+};
+
+const getDiscenteByExemplar = (id: number): Promise<DiscenteDto[]> => {
+  return knex('discentes').where('interesse', 'like', `%${id}%`).select('*');
 };
